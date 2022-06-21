@@ -110,7 +110,7 @@ class GameScene extends Phaser.Scene {
 	update (){
 
 		if(this.cursors.P.isDown && !this.pause){ 
-			console.log("Pinya")
+			console.log(this.nom);
 			this.pausa();
 		}
 

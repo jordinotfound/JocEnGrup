@@ -6,8 +6,8 @@ var load_obj = function(){
 		},
 		created: function(){
 			let arrayPartidesVladdy = [];
-			if(localStorage.partides){
-				arrayPartidesVladdy = JSON.parse(localStorage.partides);
+			if(localStorage.runner){
+				arrayPartidesVladdy = JSON.parse(localStorage.runner);
 				if(!Array.isArray(arrayPartidesVladdy)) arrayPartidesVladdy = [];
 			}
 			this.saves = arrayPartidesVladdy;

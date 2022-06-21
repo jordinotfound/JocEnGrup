@@ -7,6 +7,15 @@
  text-align: center;
 }
 
+#title_save{
+  font-size: 75px;
+  line-height: 5px;
+   display:block;
+   margin-top: 100px;
+   margin-bottom: 0px;
+ text-align: center;
+}
+
 title{
   font: small-caps 100% serif;
   font-size: 40pt;
