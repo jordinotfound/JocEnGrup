@@ -1,136 +1,169 @@
 class GameScene extends Phaser.Scene {
     constructor (){
         super('GameScene');
-		this.cards = null;
-		this.firstClick = null;
-		this.score = 100;
-		this.correct = 0;
-		this.player = "";
+        this.nom = "";
+        this.player = null;
+        this.puntuacio = 0;
+        this.pause = false;
+        this.partida = 1;
+        this.velocitat = 1;
+        this.score_text = 0;
     }	
  
     preload (){	
-		this.load.image('back', '../resources/back.png');
-		this.load.image('cb', '../resources/cb.png');
-		this.load.image('co', '../resources/co.png');
-		this.load.image('sb', '../resources/sb.png');
-		this.load.image('so', '../resources/so.png');
-		this.load.image('tb', '../resources/tb.png');
-		this.load.image('to', '../resources/to.png');
+    	this.load.image('carrils', '../resources/Background.png')
+    	this.load.image('resume', '../resources/Resume.png')
+    	this.load.image('save', '../resources/Save.png')
+    	this.load.image('exit', '../resources/Exit.png')
+    	this.load.image('misil', '../resources/Misil.png')
+		this.load.spritesheet('soldat', '../resources/spritesheet.png',{ frameWidth: 182, frameHeight: 150 })
+
 	}
 	
     create (){	
-		let totescartes = ['co', 'co', 'cb', 'cb', 'sb', 'sb', 'so', 'so', 'tb', 'tb', 'to', 'to'];
-		this.cameras.main.setBackgroundColor(0xC3D6B0);
-		var json = localStorage.getItem("config") || '{"cards":2,"dificulty":"hard"}';
-		var options_data = JSON.parse(json);
-		var cuantosPares = options_data.cards;
-		var dificultat = options_data.dificulty;
-		var arraycards = totescartes.slice(0, cuantosPares * 2)
-		var espaciadoX = cuantosPares/2 * 96;
-		var espaciadoY = cuantosPares/2 * 128;
-		if (cuantosPares > 5){
-			var files = 3
-			var columnes = 4
-		}
-		else{ 
-			var files = 2
-		  	var columnes = cuantosPares
-		}
 
-		var tempsFora = null;			
-		var puntuacioPerd = null;
+    	let nomJug = sessionStorage.username;
+    	this.nom = nomJug;
 
-		if (dificultat == "hard"){
-			tempsFora = 500;
-			puntuacioPerd = 20;
-		}
-		else if (dificultat == "normal"){
-			tempsFora = 1000;
-			puntuacioPerd = 10;
-		}
-		else {
-			tempsFora = 2000;
-			puntuacioPerd = 5;
-		}
+    	var idpartida = sessionStorage.idPartida;
+    	console.log(idpartida)
 
-		var quin = 0;
+    	var json = localStorage.getItem("runner")
+       	var cimbrel = JSON.parse(json);
+       	var options_data = {}
+       	options_data.puntuacio = cimbrel[idpartida].puntuacio;
+   		options_data.velocitat = cimbrel[idpartida].velocitat;
+    	this.puntuacio = options_data.puntuacio;
+    	this.velocitat = options_data.velocitat;
 
-		arraycards.sort((a, b) => 0.5 - Math.random());
+		this.add.image(600, 400, 'carrils');	
+		
+		this.player = this.physics.add.sprite(600, 800, 'soldat')
+		this.player.setCollideWorldBounds(true);
 
-		for (let iterador = 0; iterador < columnes; iterador++){
-			for (let j = 0; j < files; j++){
+		this.score_text = this.add.text(16,16, 'Score : ' + this.puntuacio ,{ fontSize: '32px', fill: '#FFFFFF'})
 
-				this.add.image(iterador*125 + this.cameras.main.centerX - espaciadoX, j*150 + this.cameras.main.centerY - espaciadoY/2, arraycards[quin]);
-				quin += 1;	
-			}
-		}
+		this.anims.create({
+			key: 'corrent',
+			frames: this.anims.generateFrameNumbers('soldat', { start: 0, end: 1 }),
+			frameRate: 5,
+			repeat: -1
+	 	});
 
-		this.cards = this.physics.add.staticGroup();
+		this.misilGroup = this.physics.add.group();
 
-		for (let iterador1 = 0; iterador1 < columnes; iterador1++){
-			for (let j = 0; j < files; j++){
-				this.cards.create(iterador1*125 + this.cameras.main.centerX - espaciadoX, j*150 + this.cameras.main.centerY - espaciadoY/2, 'back');
-			}
-		}
+		const crearMisil = () => {
+		    const myX = Phaser.Math.Between(100, 900);
+		    const cohet = this.misilGroup.create(1300, myX, 'misil').setScale(0.3);
+		    cohet.setVelocityY(-200);
+		    cohet.flipY = true;
+		    cohet.setDepth(6);
+		    cohet.setSize(cohet.displayWidth - 10, cohet.displayHeight - 10);
+	    };
 
-		let i = 0;
+	    this.misilTemps = this.time.addEvent({
+		    callback: crearMisil,
+		    delay: Phaser.Math.Between(2500, 5000),
+		    callbackScope: this,
+		    loop: true, 
+	    });
 
-		this.cards.children.iterate((card)=>{
-			card.card_id = arraycards[i];
-			i++;
-			card.setInteractive();
-			card.on('pointerup', () => {
-				card.disableBody(true,true);
-				if (this.firstClick){
-					if (this.firstClick.card_id !== card.card_id){
-						this.score -= puntuacioPerd;
-
-						this.firstClick.enableBody(false, 0, 0, true, true);
-						card.enableBody(false, 0, 0, true, true);
-
-						var fallo = [];
-						let aux = 0;
-
-
-						for(let i = 0; i < cuantosPares*2; i++){
-							for (let iterador = 0; iterador < columnes; iterador++){
-								for (let j = 0; j < files; j++){
-									let imatge = this.add.image(iterador*125 + this.cameras.main.centerX - espaciadoX, j*150 + this.cameras.main.centerY - espaciadoY/2, arraycards[aux]);
-									fallo.push(imatge);
-									aux++;
-								}
-							}
-						}
-						
-						setTimeout(() =>{
-							for (let iterador = 0; iterador < cuantosPares*2; iterador++){
-								fallo[iterador].destroy();
-							}
-						},tempsFora);
-						
-						
-						if (this.score <= 0){
-							alert("Game Over");
-							loadpage("../");
-						}
-					}
-					else{
-						this.correct++;
-						if (this.correct >= cuantosPares){
-							alert("You Win with " + this.score + " points.");
-							loadpage("../");
-						}
-					}
-					this.firstClick = null;
-				}
-				else{
-					console.log(card);
-					this.firstClick = card;
-				}
-			}, card);
-		});
+	 	this.cursors = this.input.keyboard.createCursorKeys();
+	 	this.cursors.P=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P,true,true);
+		this.cursors.R=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R,true,true);
 	}
-	
-//	update (){	}
+
+	save(){
+		var dades_partida = {};
+		dades_partida.nom = this.nom;
+		dades_partida.puntuacio = this.puntuacio;
+		dades_partida.velocitat = this.velocitat;
+
+    	let arrayPartidesVladdy = [];
+
+    	if (localStorage.runner){
+    		arrayPartidesVladdy = JSON.parse(localStorage.runner);
+    	}
+
+    	arrayPartidesVladdy.push(dades_partida);
+
+		localStorage.runner = JSON.stringify(arrayPartidesVladdy);
+	}
+
+	createMissile(height, texture) {
+	    const missile = this.missileGroup.create(1200 + 100, height, texture);
+	    missile.setScale(0.1);
+	    missile.setDepth(6);
+	    missile.setSize(missile.width, missile.height - 300);
+	    missile.setOffset(0, 150);
+  	}
+
+	pausa(){
+		this.physics.pause();
+		this.pause = !this.pause;
+  		var botoResume = this.add.image(600, 250, 'resume');
+        var botoSave = this.add.image(600, 500, 'save');
+        var botoExit = this.add.image(600, 750, 'exit');
+
+        botoResume.setInteractive();
+        botoResume.on('pointerup', () => {
+            this.pause = !this.pause;
+            this.physics.resume();
+            botoResume.destroy();
+            botoSave.destroy();
+            botoExit.destroy();
+        }, this);
+
+        botoExit.setInteractive();
+    	botoExit.on('pointerup', () => {
+			loadpage("../");	
+		}, this);
+
+        botoSave.setInteractive();
+        botoSave.on('pointerup', () => {
+        	
+        	this.save();
+        	
+			loadpage("../");
+        }, this);
+    }    
+
+
+	update (){
+
+		this.score_text.setText('Score: ' + this.puntuacio)
+
+
+		if(this.cursors.P.isDown && !this.pause){ 
+			console.log(this.nom);
+			this.pausa();
+		}
+
+		this.player.anims.play('corrent', true);
+		if (this.cursors.left.isDown){
+			this.player.setDrag(2000);
+			this.player.setVelocityX(-320);
+		}
+
+		if (this.cursors.right.isDown){
+			this.player.setDrag(2000);
+			this.player.setVelocityX(320);
+		}
+
+		if(this.velocitat < 500){
+			if (!this.pause) this.velocitat = this.velocitat + 0.01;
+		}
+
+		if (!this.pause) this.puntuacio += (1 * this.velocitat)*100;
+
+		/*this.temps += delta;
+    	
+    	if (this.timer >= 5000) {
+    	  	this.createMissile(415, 'missile');
+    		this.timer = 0;
+   		}*/
+
+	}
+
 }
 

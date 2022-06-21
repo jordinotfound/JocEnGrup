@@ -5,17 +5,17 @@ var load_obj = function(){
 			saves: []
 		},
 		created: function(){
-			let arrayPartides = [];
-			if(localStorage.partides){
-				arrayPartides = JSON.parse(localStorage.partides);
-				if(!Array.isArray(arrayPartides)) arrayPartides = [];
+			let arrayPartidesVladdy = [];
+			if(localStorage.runner){
+				arrayPartidesVladdy = JSON.parse(localStorage.runner);
+				if(!Array.isArray(arrayPartidesVladdy)) arrayPartidesVladdy = [];
 			}
-			this.saves = arrayPartides;
+			this.saves = arrayPartidesVladdy;
 		},
 		methods: { 
 			load: function(i){
 				sessionStorage.idPartida = i;
-				loadpage("../html/game.html");
+				loadpage("../html/phasergame.html");
 			}
 		}
 	});
