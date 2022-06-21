@@ -1,6 +1,7 @@
 class GameScene extends Phaser.Scene {
     constructor (){
         super('GameScene');
+        this.nom = "";
         this.player = null;
         this.puntuacio = 0;
         this.pause = false;
@@ -19,6 +20,10 @@ class GameScene extends Phaser.Scene {
 	}
 	
     create (){	
+
+    	let nomJug = sessionStorage.username;
+    	this.nom = nomJug;
+
 		this.add.image(600, 400, 'carrils');	
 		
 		this.player = this.physics.add.sprite(600, 800, 'soldat')
@@ -54,19 +59,20 @@ class GameScene extends Phaser.Scene {
 	}
 
 	save(){
-		var options_data;
-		options_data.puntuacio = this.puntuacio;
-		options_data.velocitat = this.velocitat;
+		var dades_partida = {};
+		dades_partida.nom = this.nom;
+		dades_partida.puntuacio = this.puntuacio;
+		dades_partida.velocitat = this.velocitat;
 
-    	let arrayPartides = [];
+    	let arrayPartidesVladdy = [];
 
-    	if (localStorage.partides){
-    		arrayPartides = JSON.parse(localStorage.partides);
+    	if (localStorage.runner){
+    		arrayPartidesVladdy = JSON.parse(localStorage.runner);
     	}
 
-    	arrayPartides.push(options_data);
+    	arrayPartidesVladdy.push(dades_partida);
 
-		localStorage.partides.setItem ("partides", JSON.stringify(arrayPartides));
+		localStorage.runner = JSON.stringify(arrayPartidesVladdy);
 	}
 
 	pausa(){
