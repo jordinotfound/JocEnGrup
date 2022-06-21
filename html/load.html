@@ -6,11 +6,11 @@
 		<title> My first game - Load </title>
 	</head>
 	<body>
-		<h1  id="title_save">Save files</h1>
 		<div id="saves_id">
+			<p class="menu-object" id="title">Save files</p>
 			<div v-for="(save, indx) in saves">
 				<button class="menu-object" v-on:click="load(indx)"> 
-					{{save.nom}} 
+					{{save.username}} 
 				</button>
 			</div>
 		</div>

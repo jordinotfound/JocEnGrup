@@ -7,11 +7,6 @@ function start_game(){
 }
 
 function phaser_game(){
-	var name = prompt("Entra un nom");
-	while (name=="" || !name){
-        name = prompt("User name");
-    }
-	sessionStorage.setItem("username", name);
 	loadpage("./html/phasergame.html");
 }
 
@@ -26,6 +21,13 @@ function exit (){
 	name = "";
 }
 
+function puntuacions(){
+	loadpage("./html/puntuacions.html")
+}
+
+function options(){
+	loadpage("./html/options.html");
+}
 
 function load(){
 	loadpage("./html/load.html");
